@@ -10,10 +10,10 @@ namespace WordBankServer
 	class MainClass
 	{
 		private static Random randGen = new Random ();
-		private static string homeDirectory = "/Users/ngjeff/dev/FreeCreate2018/WordBankServer/WordBankServer/";
-		private static string fileDirectory = homeDirectory + "files/";
+		private static string homeDirectory = "./";
+		private static string fileDirectory = homeDirectory + "WebServerFiles/";
 
-		private static string wordList = homeDirectory + "wordList_8_13.txt";
+		private static string wordList = fileDirectory + "wordList_8_13.txt";
 		private static string templateFile = fileDirectory + "template.html";
 
 		public static void Main (string[] args)
@@ -30,7 +30,8 @@ namespace WordBankServer
 			// set up listeners
 			HttpListener listener = new HttpListener();
 			listener.Prefixes.Add ("http://localhost:5432/");
-			listener.Start ();
+            listener.Prefixes.Add("http://+:80/");
+            listener.Start ();
 			while (true) {
 				HttpListenerContext context = listener.GetContext ();
 
