@@ -1,0 +1,25 @@
+.image {
+    position:relative;
+    text-align:center;
+    float: left;
+}
+
+.text {
+    left: 0;
+    position:absolute;
+    text-align:center;
+    top: 150px;
+    width: 100%;
+    font-size: 200%;
+    font-family: Verdana;
+}
+
+#easy1 { top: 150px; }
+#easy2 { top: 230px; }
+#easy3 { top: 310px; }
+#medi1 { top: 480px; }
+#medi2 { top: 560px; }
+#medi3 { top: 640px; }
+#hard1 { top: 810px; }
+#hard2 { top: 890px; }
+#hard3 { top: 970px; }

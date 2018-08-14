@@ -1,0 +1,15 @@
+﻿<Properties StartupItem="WordBankServer/WordBankServer.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="WordBankServer/Program.cs">
+    <Files>
+      <File FileName="WordBankServer/Program.cs" Line="15" Column="1" />
+      <File FileName="WordBankServer/ConceptDeck.cs" Line="16" Column="18" />
+      <File FileName="WordBankServer/ConceptCard.cs" Line="28" Column="19" />
+      <File FileName="WordBankServer/wordParser.cs" Line="10" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
