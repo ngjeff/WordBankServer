@@ -17,9 +17,7 @@ namespace WordBankServer
 		}
 
 		public static void SendFileResponse(string path, HttpListenerResponse response) {
-			using( FileStream fs = File.OpenRead( fileDirectory + path ) ) {
-
-				//response is HttpListenerContext.Response...
+			using( FileStream fs = File.OpenRead( path ) ) {
 				response.ContentLength64 = fs.Length;
 				response.SendChunked = false;
 				if (path.EndsWith (".jpg")) {
@@ -27,6 +25,9 @@ namespace WordBankServer
 				} else if (path.EndsWith (".gif")) {
 					response.ContentType = System.Net.Mime.MediaTypeNames.Image.Gif;
 				}
+
+				response.StatusCode = ( int )HttpStatusCode.OK;
+				response.StatusDescription = "OK";
 
 				byte[] buffer = new byte[ 64 * 1024 ];
 				int read;
@@ -37,8 +38,6 @@ namespace WordBankServer
 					}
 				}
 
-				response.StatusCode = ( int )HttpStatusCode.OK;
-				response.StatusDescription = "OK";
 				response.OutputStream.Close();
 			}
 		}
@@ -47,7 +46,7 @@ namespace WordBankServer
 		{
 			string returnFile = templateFile;
 			for (int i = 0; i < words.Length; i++) {
-				returnFile.Replace ("__TEMPLATE_ITEM_" + (i + 1) + "__", words [i]);
+				returnFile = returnFile.Replace ("__TEMPLATE_ITEM_" + (i + 1) + "__", words [i]);
 			}
 
 			byte[] buffer = System.Text.Encoding.UTF8.GetBytes(returnFile);

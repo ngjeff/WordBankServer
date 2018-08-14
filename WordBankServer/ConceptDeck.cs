@@ -25,7 +25,7 @@ namespace WordBankServer
 			}
 		}
 
-		public ConceptCard DrawCard(int user)
+		public ConceptCard DrawCard()
 		{
 			lock (deckLock) {
 				if (drawPile.Count == 0) {
@@ -33,7 +33,7 @@ namespace WordBankServer
 				}
 				ConceptCard drawnCard = drawPile.Dequeue ();
 				cardsInUse.Add (drawnCard);
-				//TODO: Mark the card with user for... auth?  Or something?
+
 				return drawnCard;
 			}
 		}

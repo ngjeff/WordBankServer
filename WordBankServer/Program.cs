@@ -38,36 +38,40 @@ namespace WordBankServer
 				HttpListenerResponse response = context.Response;
 
 				try {
-					NameValueCollection queryParams = ParseQueryString (request.Url.Query);
+					NameValueCollection queryParams = ResponseUtils.ParseQueryString (request.Url.Query);
 					// Standard action should be "return the file at that spot"
 					if (queryParams.Count == 0 && !request.Url.LocalPath.EndsWith("/"))
 					{
 						// return whatever file is asked for, if it's present.
-						SendFileResponse(request.Url.LocalPath, response);
+						ResponseUtils.SendFileResponse(fileDirectory + request.Url.LocalPath, response);
 						continue;
 					}
 
 					if (queryParams.Count == 0 && (request.Url.LocalPath.Equals ("") || request.Url.LocalPath.Equals("/")))
 					{
-						// default draw-card behavior
+						// Default draw behavior
+						ConceptCard card = deck.DrawCard();
+						ResponseUtils.SendCardResponse(response, card.Words);
+						continue;
 					}
 
 					// ?action=draw
 					if (request.Url.LocalPath.Equals("/play") && queryParams["action"] == "draw")
 					{
-						
+						ResponseUtils.SendTextResponse(response, request.Url.Query);
+						continue;
 					}
 
 					if (request.Url.LocalPath.Equals("/play") && queryParams["action"] == "discard")
 					{
-
+						ResponseUtils.SendTextResponse(response, request.Url.Query);
+						continue;
 					}
-					// gonna be annoying to handle all those pictures...
-					SendResponse(response, request.Url.Query);
 				}
 				catch(Exception e) {
-					response.StatusCode = (int) HttpStatusCode.BadRequest;
-					SendResponse (response, "Bad Request:" + e.Message);
+					Console.WriteLine (e);
+//					response.StatusCode = (int) HttpStatusCode.BadRequest;
+//					ResponseUtils.SendTextResponse (response, "Bad Request:" + e.Message);
 				}
 
 			}
@@ -85,7 +89,7 @@ namespace WordBankServer
 
 			ConceptDeck deck = new ConceptDeck (parsedCards, randGen);
 			for (int i = 0; i < 101; i++) {
-				ConceptCard drawn = deck.DrawCard (1);
+				ConceptCard drawn = deck.DrawCard ();
 				deck.DiscardCard (drawn.id);
 			}
 
