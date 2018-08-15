@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Drawing;
 using System.IO;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Web;
 
 namespace WordBankServer
@@ -20,15 +22,25 @@ namespace WordBankServer
 		{
 			randGen = new Random (12345); // For now constant seed.
 
+            // Load up the blank card image.
+            Image blankCard = Image.FromFile(fileDirectory + "blankCard.jpg");
+
 			// read in deck, parse, create cards, save
-			ConceptDeck deck = new ConceptDeck(WordParser.ParseWords (randGen, wordList), randGen);
+			ConceptDeck deck = new ConceptDeck(WordParser.ParseWords (randGen, wordList, blankCard), randGen);
 
 			Console.WriteLine(deck.ToString ());
-			// Initialize template file
+			
+            // Initialize template file
 			ResponseUtils.InitializeTemplate(templateFile);
 
-			// set up listeners
-			HttpListener listener = new HttpListener();
+            // set up some Regexes
+            string pattern = "[0-9]+";
+            Regex numberMatch = new Regex(pattern);
+            string customCardpattern = "CustomCard_[0-9]+.jpg";
+            Regex customCardMatch = new Regex(customCardpattern);
+
+            // set up listeners
+            HttpListener listener = new HttpListener();
 			listener.Prefixes.Add ("http://localhost:5432/");
             listener.Prefixes.Add("http://+:80/");
             listener.Start ();
@@ -40,11 +52,20 @@ namespace WordBankServer
 
 				try {
 					NameValueCollection queryParams = ResponseUtils.ParseQueryString (request.Url.Query);
-					// Standard action should be "return the file at that spot"
-					if (queryParams.Count == 0 && !request.Url.LocalPath.EndsWith("/"))
-					{
-						// return whatever file is asked for, if it's present.
-						ResponseUtils.SendFileResponse(fileDirectory + request.Url.LocalPath, response);
+                    // Standard action should be "return the file at that spot"
+                    if (queryParams.Count == 0 && !request.Url.LocalPath.EndsWith("/"))
+                    {
+                        if (customCardMatch.IsMatch(request.Url.LocalPath))
+                        {
+                            // the card images are served from memory.  Isolate the card number and pass along the card.
+                            MatchCollection matches = numberMatch.Matches(request.Url.LocalPath);
+                            ResponseUtils.SendCardGraphicResponse(response, deck.GetCardById(Int32.Parse(matches[0].Value)));
+                        }
+                        else
+                        {
+                            // return whatever file is asked for, if it's present.
+                            ResponseUtils.SendFileResponse(fileDirectory + request.Url.LocalPath, response);
+                        }
 						continue;
 					}
 
@@ -52,7 +73,7 @@ namespace WordBankServer
 					{
 						// Default draw behavior
 						ConceptCard card = deck.DrawCard();
-						ResponseUtils.SendCardResponse(response, card.Words);
+						ResponseUtils.SendCardResponse(response, card);
 						continue;
 					}
 
@@ -100,7 +121,7 @@ namespace WordBankServer
 		public static ConceptCard CreateTestCard(int id)
 		{
 			string[] words = { "test_" + id };
-			return new ConceptCard (words, id);
+			return new ConceptCard (words, id, null);
 		}
 	}
 }

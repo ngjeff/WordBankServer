@@ -13,13 +13,22 @@ namespace WordBankServer
 		private List<ConceptCard> cardsInUse = new List<ConceptCard>();
 		private List<ConceptCard> discardPile;
 
+        private ConceptCard[] cardsById;
+
 		private Random randGen;
 
 		// Create a deck to draw from.
 		public ConceptDeck (List<ConceptCard> initialPile, Random randGen)
 		{
-			this.randGen = randGen;
-			lock (deckLock) {
+            this.randGen = randGen;
+
+            cardsById = new ConceptCard[initialPile.Count];
+            foreach (ConceptCard card in initialPile)
+            {
+                cardsById[card.id] = card;
+            }
+
+            lock (deckLock) {
 				this.discardPile = initialPile;
 				ShuffleDiscard ();
 			}
@@ -57,7 +66,12 @@ namespace WordBankServer
 			}
 		}
 
-		public override string ToString()
+        public ConceptCard GetCardById(int id)
+        {
+            return cardsById[id];
+        }
+
+        public override string ToString()
 		{
 			StringBuilder sb = new StringBuilder ();
 			sb.AppendLine ("DrawPile");

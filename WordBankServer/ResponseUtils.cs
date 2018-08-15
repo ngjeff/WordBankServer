@@ -17,7 +17,7 @@ namespace WordBankServer
 		}
 
 		public static void SendFileResponse(string path, HttpListenerResponse response) {
-			using( FileStream fs = File.OpenRead( path ) ) {
+            using ( FileStream fs = File.OpenRead( path ) ) {
 				response.ContentLength64 = fs.Length;
 				response.SendChunked = false;
 				if (path.EndsWith (".jpg")) {
@@ -42,12 +42,14 @@ namespace WordBankServer
 			}
 		}
 
-		public static void SendCardResponse(HttpListenerResponse response, string[] words)
+		public static void SendCardResponse(HttpListenerResponse response, ConceptCard card)
 		{
+
+            // Looks like we need to write the card info in the template instead, and 
+            // provide a way for the later call to get access to it.
+            
 			string returnFile = templateFile;
-			for (int i = 0; i < words.Length; i++) {
-				returnFile = returnFile.Replace ("__TEMPLATE_ITEM_" + (i + 1) + "__", words [i]);
-			}
+            returnFile = returnFile.Replace("__TEMPLATE_ITEM_1__", $"CustomCard_{card.id}.jpg");
 
 			byte[] buffer = System.Text.Encoding.UTF8.GetBytes(returnFile);
 			// Get a response stream and write the response to it.
@@ -56,9 +58,19 @@ namespace WordBankServer
 			output.Write(buffer,0,buffer.Length);
 			// You must close the output stream.
 			output.Close();
-		}
+        }
 
-		public static void SendTextResponse(HttpListenerResponse response, string outputValue)
+        public static void SendCardGraphicResponse(HttpListenerResponse response, ConceptCard card)
+        {
+            // Pull the image out of the card in memory and send it down.
+            response.ContentLength64 = card.CardImage.Length;
+            System.IO.Stream output = response.OutputStream;
+            output.Write(card.CardImage, 0, card.CardImage.Length);
+            // You must close the output stream.
+            output.Close();
+        }
+
+            public static void SendTextResponse(HttpListenerResponse response, string outputValue)
 		{
 			// Construct a response.
 			string responseString = "<HTML><BODY>" + outputValue + "</BODY></HTML>";

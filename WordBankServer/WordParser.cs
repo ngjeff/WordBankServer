@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 
@@ -7,7 +8,7 @@ namespace WordBankServer
 {
 	public class WordParser
 	{
-		public static List<ConceptCard> ParseWords (Random randGen, string filePath)
+		public static List<ConceptCard> ParseWords (Random randGen, string filePath, Image blankCard)
 		{
 			// read all the words, and put them in sorted by difficulty.
 			string[] lines = System.IO.File.ReadAllLines(filePath);
@@ -49,7 +50,7 @@ namespace WordBankServer
 					wordsForCard.Add(RemoveAndRetrieveWord (hardWords, randGen));
 				}
 
-				results.Add (new ConceptCard (wordsForCard.ToArray(), cardNum));
+				results.Add (new ConceptCard (wordsForCard.ToArray(), cardNum, blankCard));
 				cardNum++;
 			}
 
