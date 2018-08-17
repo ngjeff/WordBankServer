@@ -16,7 +16,7 @@ namespace WordBankServer
 		private static string homeDirectory = "./";
 		private static string fileDirectory = homeDirectory + "WebServerFiles/";
 
-		private static string wordList = fileDirectory + "wordList_8_14.txt";
+		private static string wordList = fileDirectory + "wordList_8_17.txt";
 		private static string templateFile = fileDirectory + "template.html";
 
         // set up some Regexes for later use by all threads
