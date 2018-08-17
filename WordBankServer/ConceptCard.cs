@@ -26,8 +26,11 @@ namespace WordBankServer
             {
                 GenerateImage(cardTemplate);
             }
-		}
+            leaseExpiry = DateTime.MinValue;
 
+            Console.WriteLine("Created Card:" + this.ToString());
+		}
+        
 		public void GenerateImage(Image template)
 		{
             Image card = (Image)template.Clone();
@@ -85,6 +88,16 @@ namespace WordBankServer
                 }
             }
             return null;
+        }
+
+        public void RefreshExpiry()
+        {
+            this.leaseExpiry = DateTime.UtcNow + TimeSpan.FromSeconds(60);
+        }
+
+        public bool IsExpired()
+        {
+            return this.leaseExpiry < DateTime.UtcNow;
         }
 
         public override string ToString()

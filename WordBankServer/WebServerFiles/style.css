@@ -1,15 +1,33 @@
-.image {
-    position:relative;
-    text-align:center;
+.img {
+    position: relative;
+    text-align: center;
     float: left;
 }
 
 .text {
     left: 0;
-    position:absolute;
-    text-align:center;
+    position: absolute;
+    text-align: center;
     top: 150px;
     width: 100%;
     font-size: 200%;
     font-family: Verdana;
+}
+
+#bg {
+    /* Preserve aspect ratio */
+    max-width: 100%;
+}
+
+.centertable {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    min-width: 100%;
+}
+
+.uiform {
+    width: 10em;
+    height: 2em;
+    font-size: 14px;
 }

@@ -1,21 +1,42 @@
+<script type="text/javascript" language="javascript">
+
+function RefreshExpiry() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("GET", "/play?action=refresh", true);
+    xhttp.send();
+    }
+
+document.getElementById("myButton").onclick = function () {
+    location.href = "/play?action=draw";
+    };
+
+__TEMPLATE_ITEM_0__
+</script>
+
 <HTML>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<meta content="width=device-width; initial-scale=1.0; maximum-scale=1.0;" name="viewport">
+<link rel="stylesheet" href="style.css">
+<link rel="shortcut icon icon" href="favicon.gif">
+</head>
 <BODY>
-    <IMG SRC="__TEMPLATE_ITEM_1__">
-    <CENTER>
-        <TABLE>
-            <TR>
-                <TD>
-                    <form action="__DRAW_NEW_CARD_URL__">
-                        <input type="submit" value="Draw a new card" />
-                    </form>
-                </TD>
-                <TD>
-                    <form action="http://google.com">
-                        <input type="submit" value="Discard your card" />
-                    </form>
-                </TD>
-            </TR>
-        </TABLE>
-    </CENTER>
+    __TEMPLATE_ITEM_1__
+    <TABLE class="centerTable">
+        <TR>
+            <TD>
+                <form action="play?action=draw">
+                    <input class="uiform" type="submit" value="Draw a new card" />
+                    <input type="hidden" name="action" value="draw" />
+                </form>
+            </TD>
+            <TD>
+                <form action="play?action=discard">
+                    <input class="uiform" type="submit" value="Discard your card" />
+                    <input type="hidden" name="action" value="discard" />
+                </form>
+            </TD>
+        </TR>
+    </TABLE>
 </BODY>
 </HTML>

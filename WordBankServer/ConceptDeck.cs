@@ -36,29 +36,67 @@ namespace WordBankServer
 
 		public ConceptCard DrawCard()
 		{
-			lock (deckLock) {
+            ConceptCard drawnCard;
+            lock (deckLock)
+            {
+                // Auto-discard any expired cards.
+                List<ConceptCard> expiredCards = new List<ConceptCard>();
+                foreach (ConceptCard card in cardsInUse)
+                {
+                    if (card.IsExpired())
+                    {
+                        expiredCards.Add(card);
+                    }
+                }
+
+                foreach (ConceptCard card in expiredCards)
+                {
+                    Console.WriteLine($"Card {card.id} expired and auto-discaded.");
+                    discardPile.Add(card);
+                    cardsInUse.Remove(card);
+                }
+
+                if (drawPile.Count == 0 && discardPile.Count == 0)
+                {
+                    Console.WriteLine($"All cards are in use!  Cannot draw a card.");
+                    return null;
+                }
+
 				if (drawPile.Count == 0) {
 					ShuffleDiscard ();
 				}
-				ConceptCard drawnCard = drawPile.Dequeue ();
+				drawnCard = drawPile.Dequeue ();
 				cardsInUse.Add (drawnCard);
+            }
 
-				return drawnCard;
-			}
+            drawnCard.RefreshExpiry();
+            Console.WriteLine($"Card {drawnCard.id} drawn.  {drawPile.Count} cards left in deck.");
+			return drawnCard;
 		}
 
 		public void DiscardCard(int cardId)
 		{
-			ConceptCard chosenCard = cardsInUse.Where (p => p.id == cardId).First ();
-			discardPile.Add (chosenCard);
-			cardsInUse.Remove (chosenCard);
+            if (cardsInUse.Where(p => p.id == cardId).Count() == 0)
+            {
+                Console.WriteLine($"Attempt to discard card {cardId} which is not in use.");
+                return;
+            }
+
+            Console.WriteLine($"Card {cardId} discarded.");
+            lock (deckLock)
+            {
+                ConceptCard chosenCard = cardsInUse.Where(p => p.id == cardId).First();
+                discardPile.Add(chosenCard);
+                cardsInUse.Remove(chosenCard);
+            }
 		}
 
 		// This modifies both decks.  Must be called withn the deckLock.
 		private void ShuffleDiscard()
 		{
-			// pull cards out out of the discard in a random order, and insert into the draw pile.
-			while (discardPile.Count != 0) {
+            Console.WriteLine("Deck empty, reshuffling.");
+            // pull cards out out of the discard in a random order, and insert into the draw pile.
+            while (discardPile.Count != 0) {
 				int index = randGen.Next (0, discardPile.Count - 1);
 				ConceptCard card = discardPile [index];
 				drawPile.Enqueue (card);
@@ -74,15 +112,15 @@ namespace WordBankServer
         public override string ToString()
 		{
 			StringBuilder sb = new StringBuilder ();
-			sb.AppendLine ("DrawPile");
+			sb.AppendLine ("DrawPile:");
 			foreach (ConceptCard card in drawPile) {
 				sb.AppendLine (card.ToString());
 			}
-			sb.AppendLine ("cardsInUse");
+			sb.AppendLine ("cardsInUse:");
 			foreach (ConceptCard card in cardsInUse) {
 				sb.AppendLine (card.ToString());
 			}
-			sb.AppendLine ("DiscardPile");
+			sb.AppendLine ("DiscardPile:");
 			foreach (ConceptCard card in discardPile) {
 				sb.AppendLine (card.ToString());
 			}

@@ -5,6 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Web;
 
 namespace WordBankServer
@@ -18,27 +19,29 @@ namespace WordBankServer
 		private static string wordList = fileDirectory + "wordList_8_14.txt";
 		private static string templateFile = fileDirectory + "template.html";
 
-		public static void Main (string[] args)
+        // set up some Regexes for later use by all threads
+        private static Regex numberMatch = new Regex("[0-9]+");
+        private static Regex customCardMatch = new Regex("(?i:CustomCard)_[0-9]+.jpg");
+
+        // Save some variables for global use
+        private static ConceptDeck deck;
+
+        public static void Main (string[] args)
 		{
-			randGen = new Random (12345); // For now constant seed.
+            //// randGen = new Random (12345); // For now constant seed.
+            randGen = new Random (23456); // For now constant seed.
 
             // Load up the blank card image.
             Image blankCard = Image.FromFile(fileDirectory + "blankCard.jpg");
 
 			// read in deck, parse, create cards, save
-			ConceptDeck deck = new ConceptDeck(WordParser.ParseWords (randGen, wordList, blankCard), randGen);
+			deck = new ConceptDeck(WordParser.ParseWords (randGen, wordList, blankCard), randGen);
 
 			Console.WriteLine(deck.ToString ());
 			
             // Initialize template file
 			ResponseUtils.InitializeTemplate(templateFile);
-
-            // set up some Regexes
-            string pattern = "[0-9]+";
-            Regex numberMatch = new Regex(pattern);
-            string customCardpattern = "CustomCard_[0-9]+.jpg";
-            Regex customCardMatch = new Regex(customCardpattern);
-
+            
             // set up listeners
             HttpListener listener = new HttpListener();
 			listener.Prefixes.Add ("http://localhost:5432/");
@@ -46,61 +49,110 @@ namespace WordBankServer
             listener.Start ();
 			while (true) {
 				HttpListenerContext context = listener.GetContext ();
-
-				HttpListenerRequest request = context.Request;
-				HttpListenerResponse response = context.Response;
-
-				try {
-					NameValueCollection queryParams = ResponseUtils.ParseQueryString (request.Url.Query);
-                    // Standard action should be "return the file at that spot"
-                    if (queryParams.Count == 0 && !request.Url.LocalPath.EndsWith("/"))
-                    {
-                        if (customCardMatch.IsMatch(request.Url.LocalPath))
-                        {
-                            // the card images are served from memory.  Isolate the card number and pass along the card.
-                            MatchCollection matches = numberMatch.Matches(request.Url.LocalPath);
-                            ResponseUtils.SendCardGraphicResponse(response, deck.GetCardById(Int32.Parse(matches[0].Value)));
-                        }
-                        else
-                        {
-                            // return whatever file is asked for, if it's present.
-                            ResponseUtils.SendFileResponse(fileDirectory + request.Url.LocalPath, response);
-                        }
-						continue;
-					}
-
-					if (queryParams.Count == 0 && (request.Url.LocalPath.Equals ("") || request.Url.LocalPath.Equals("/")))
-					{
-						// Default draw behavior
-						ConceptCard card = deck.DrawCard();
-						ResponseUtils.SendCardResponse(response, card);
-						continue;
-					}
-
-					// ?action=draw
-					if (request.Url.LocalPath.Equals("/play") && queryParams["action"] == "draw")
-					{
-						ResponseUtils.SendTextResponse(response, request.Url.Query);
-						continue;
-					}
-
-					if (request.Url.LocalPath.Equals("/play") && queryParams["action"] == "discard")
-					{
-						ResponseUtils.SendTextResponse(response, request.Url.Query);
-						continue;
-					}
-				}
-				catch(Exception e) {
-					Console.WriteLine (e);
-//					response.StatusCode = (int) HttpStatusCode.BadRequest;
-//					ResponseUtils.SendTextResponse (response, "Bad Request:" + e.Message);
-				}
-
+                ThreadPool.QueueUserWorkItem(ProcessRequest, context);
 			}
-			Console.WriteLine ("Hello World!");
-
 		}
 
+        private static void ProcessRequest(object contextArg)
+        {
+            HttpListenerContext context = contextArg as HttpListenerContext;
+            HttpListenerRequest request = context.Request;
+            HttpListenerResponse response = context.Response;
+
+            try
+            {
+                NameValueCollection queryParams = ResponseUtils.ParseQueryString(request.Url.Query);
+                // Standard action should be "return the file at that spot"
+                if (queryParams.Count == 0 && !request.Url.LocalPath.EndsWith("/"))
+                {
+                    if (customCardMatch.IsMatch(request.Url.LocalPath))
+                    {
+                        // the card images are served from memory.  Isolate the card number and pass along the card.
+                        MatchCollection matches = numberMatch.Matches(request.Url.LocalPath);
+                        ResponseUtils.SendCardGraphicResponse(response, deck.GetCardById(Int32.Parse(matches[0].Value)));
+                    }
+                    else
+                    {
+                        // return whatever file is asked for, if it's present.
+                        ResponseUtils.SendFileResponse(fileDirectory + request.Url.LocalPath, response);
+                    }
+                }
+
+                if (queryParams.Count == 0 && (request.Url.LocalPath.Equals("") || request.Url.LocalPath.Equals("/")))
+                {
+                    // Default draw behavior
+                    int currentCard = 0;
+                    ConceptCard card;
+                    if (context.Request.Cookies != null &&
+                        context.Request.Cookies["CardId"] != null &&
+                        Int32.TryParse(context.Request.Cookies["cardid"].Value, out currentCard))
+                    {
+                        // If the user already has a card, and it's not expired,
+                        // display to them the one they have.
+                        card = deck.GetCardById(currentCard);
+                        if (!card.IsExpired())
+                        {
+                            card.RefreshExpiry();
+                            ResponseUtils.SendTemplateResponse(response, card);
+                            return;
+                        }
+                    }
+
+                    // Otherwise, it's first use--draw a card.
+                    card = deck.DrawCard();
+                    ResponseUtils.SendTemplateResponse(response, card);
+                }
+
+                // ?action=draw
+                if (request.Url.LocalPath.Equals("/play") && queryParams["action"] == "draw")
+                {
+                    int currentCard = 0;
+                    if (context.Request.Cookies != null &&
+                        context.Request.Cookies["CardId"] != null &&
+                        Int32.TryParse(context.Request.Cookies["cardid"].Value, out currentCard))
+                    {
+                        deck.DiscardCard(currentCard);
+                    }
+
+                    ConceptCard card = deck.DrawCard();
+                    ResponseUtils.SendTemplateResponse(response, card);
+                }
+
+                // ?action=discard
+                if (request.Url.LocalPath.Equals("/play") && queryParams["action"] == "discard")
+                {
+                    int currentCard = 0;
+                    if (Int32.TryParse(context.Request.Cookies["cardid"].Value, out currentCard))
+                    {
+                        deck.DiscardCard(currentCard);
+                    }
+
+                    ResponseUtils.SendTemplateResponse(response, "No card present.  Select draw to draw a card.");
+                }
+
+                // ?action=refresh
+                if (request.Url.LocalPath.Equals("/play") && queryParams["action"] == "refresh")
+                {
+                    int currentCard = 0;
+                    if (Int32.TryParse(context.Request.Cookies["cardid"].Value, out currentCard))
+                    {
+                        ConceptCard card = deck.GetCardById(currentCard);
+                        if (!card.IsExpired())
+                        {
+                            card.RefreshExpiry();
+                        }
+                    }
+
+                    ResponseUtils.SendTextResponse(response, "Refresh");
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //					response.StatusCode = (int) HttpStatusCode.BadRequest;
+                //					ResponseUtils.SendTextResponse (response, "Bad Request:" + e.Message);
+            }
+        }
 
 		public static void TestCardShuffling()
 		{
