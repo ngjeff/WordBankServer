@@ -42,11 +42,11 @@ namespace WordBankServer
 			}
 		}
 
-		public static void SendTemplateResponse(HttpListenerResponse response, ConceptCard card)
+		public static void SendTemplateResponse(HttpListenerResponse response, string cookieName, ConceptCard card)
 		{
             // Looks like we need to write the card info in the template instead, and 
             // provide a way for the later call to get access to it.
-            response.AppendCookie(new Cookie("cardid", card.id.ToString()));
+            response.AppendCookie(new Cookie(cookieName, card.id.ToString()));
 			string returnFile = templateFile;
             if (card != null)
             {
@@ -81,10 +81,10 @@ namespace WordBankServer
             }
         }
 
-        public static void SendTemplateResponse(HttpListenerResponse response, string text)
+        public static void SendTemplateResponse(HttpListenerResponse response, string cookieName, string text)
         {
             // Use this to provide text to the user, while still showing the buttons for action.
-            Cookie deletedCookie = new Cookie("cardid", "NO_CARD");
+            Cookie deletedCookie = new Cookie(cookieName, "NO_CARD");
             deletedCookie.Expires = DateTime.MinValue;
             response.AppendCookie(deletedCookie);
 

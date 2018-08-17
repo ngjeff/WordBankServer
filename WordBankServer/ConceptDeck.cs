@@ -51,14 +51,14 @@ namespace WordBankServer
 
                 foreach (ConceptCard card in expiredCards)
                 {
-                    Console.WriteLine($"Card {card.id} expired and auto-discaded.");
+                    Console.WriteLine($"{DateTime.Now}:Card {card.id} expired and auto-discaded.");
                     discardPile.Add(card);
                     cardsInUse.Remove(card);
                 }
 
                 if (drawPile.Count == 0 && discardPile.Count == 0)
                 {
-                    Console.WriteLine($"All cards are in use!  Cannot draw a card.");
+                    Console.WriteLine($"{DateTime.Now}:All cards are in use!  Cannot draw a card.");
                     return null;
                 }
 
@@ -70,7 +70,7 @@ namespace WordBankServer
             }
 
             drawnCard.RefreshExpiry();
-            Console.WriteLine($"Card {drawnCard.id} drawn.  {drawPile.Count} cards left in deck.");
+            Console.WriteLine($"{DateTime.Now}:Card {drawnCard.id} drawn.  {drawPile.Count} cards left in deck.");
 			return drawnCard;
 		}
 
@@ -78,11 +78,11 @@ namespace WordBankServer
 		{
             if (cardsInUse.Where(p => p.id == cardId).Count() == 0)
             {
-                Console.WriteLine($"Attempt to discard card {cardId} which is not in use.");
+                Console.WriteLine($"{DateTime.Now}:Attempt to discard card {cardId} which is not in use.");
                 return;
             }
 
-            Console.WriteLine($"Card {cardId} discarded.");
+            Console.WriteLine($"{DateTime.Now}:Card {cardId} discarded.");
             lock (deckLock)
             {
                 ConceptCard chosenCard = cardsInUse.Where(p => p.id == cardId).First();
@@ -94,7 +94,7 @@ namespace WordBankServer
 		// This modifies both decks.  Must be called withn the deckLock.
 		private void ShuffleDiscard()
 		{
-            Console.WriteLine("Deck empty, reshuffling.");
+            Console.WriteLine("{DateTime.Now}:Deck empty, reshuffling.");
             // pull cards out out of the discard in a random order, and insert into the draw pile.
             while (discardPile.Count != 0) {
 				int index = randGen.Next (0, discardPile.Count - 1);
