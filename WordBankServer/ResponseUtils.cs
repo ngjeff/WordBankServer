@@ -115,7 +115,7 @@ namespace WordBankServer
             output.Close();
         }
 
-            public static void SendTextResponse(HttpListenerResponse response, string outputValue)
+        public static void SendTextResponse(HttpListenerResponse response, string outputValue)
 		{
 			// Construct a response.
 			string responseString = "<HTML><BODY>" + outputValue + "</BODY></HTML>";

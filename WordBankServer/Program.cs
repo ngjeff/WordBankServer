@@ -16,8 +16,9 @@ namespace WordBankServer
 		private static string homeDirectory = "./";
 		private static string fileDirectory = homeDirectory + "WebServerFiles/";
 
-		private static string wordList = fileDirectory + "wordList_8_17.txt";
-		private static string templateFile = fileDirectory + "template.html";
+		private static string xboxWordList = fileDirectory + "wordList_8_17.txt";
+        private static string picnicWordList = fileDirectory + "WordBankPicnic.txt";
+        private static string templateFile = fileDirectory + "template.html";
 
         // set up some Regexes for later use by all threads
         private static Regex numberMatch = new Regex("[0-9]+");
@@ -26,19 +27,21 @@ namespace WordBankServer
         // Save some variables for global use
         private static Dictionary<string, ConceptDeck> decks = new Dictionary<string, ConceptDeck>();
         private const string XboxDeckName = "xbox";
+        private const string PicnicDeckName = "picnic";
 
         public static void Main (string[] args)
 		{
             //// randGen = new Random (12345); // For now constant seed.
-            randGen = new Random (45678); // For now constant seed.
+            randGen = new Random (56789); // For now constant seed.
 
             // Load up the blank card image.
             Image blankCard = Image.FromFile(fileDirectory + "blankCard.jpg");
 
 			// read in deck, parse, create cards, save
-			decks[XboxDeckName] = new ConceptDeck(WordParser.ParseWords (randGen, wordList, blankCard), randGen);
+			decks[XboxDeckName] = new ConceptDeck(WordParser.ParseWords (randGen, xboxWordList, blankCard), randGen);
+            decks[PicnicDeckName] = new ConceptDeck(WordParser.ParseWords(randGen, picnicWordList, blankCard), randGen);
 
-			Console.WriteLine(decks[XboxDeckName].ToString ());
+            Console.WriteLine(decks[XboxDeckName].ToString ());
 			
             // Initialize template file
 			ResponseUtils.InitializeTemplate(templateFile);
@@ -68,7 +71,7 @@ namespace WordBankServer
             //  / xbox/ [filename]
             //  / xbox/play?action=draw
             //  / xbox/play?action=discard
-
+              
             if ((request.Url.Segments.Length < 2) || (request.Url.Segments.Length > 3))
             {
                 // 404 it.
@@ -88,7 +91,7 @@ namespace WordBankServer
             }
 
             // ConceptDeck deck = decks[request.Url.Segments[1]];
-            ConceptDeck deck = decks[XboxDeckName];
+            ConceptDeck deck = decks[deckName];
             string cookieName = $"{deckName}_cardid";
             try
             {
