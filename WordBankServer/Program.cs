@@ -32,7 +32,7 @@ namespace WordBankServer
         public static void Main (string[] args)
 		{
             //// randGen = new Random (12345); // For now constant seed.
-            randGen = new Random (56789); // For now constant seed.
+            randGen = new Random (56987); // For now constant seed.
 
             // Load up the blank card image.
             Image blankCard = Image.FromFile(fileDirectory + "blankCard.jpg");
@@ -190,6 +190,7 @@ namespace WordBankServer
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return;
                 //					response.StatusCode = (int) HttpStatusCode.BadRequest;
                 //					ResponseUtils.SendTextResponse (response, "Bad Request:" + e.Message);
             }

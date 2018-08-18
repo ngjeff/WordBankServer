@@ -94,7 +94,7 @@ namespace WordBankServer
 		// This modifies both decks.  Must be called withn the deckLock.
 		private void ShuffleDiscard()
 		{
-            Console.WriteLine("{DateTime.Now}:Deck empty, reshuffling.");
+            Console.WriteLine($"{DateTime.Now}:Deck empty, reshuffling.");
             // pull cards out out of the discard in a random order, and insert into the draw pile.
             while (discardPile.Count != 0) {
 				int index = randGen.Next (0, discardPile.Count - 1);
