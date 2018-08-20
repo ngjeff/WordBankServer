@@ -59,6 +59,7 @@ namespace WordBankServer
                 returnFile = returnFile.Replace("__TEMPLATE_ITEM_1__", "The draw pile is empty.  Wait for another player to discard a card!");
             }
 
+            Console.WriteLine($"{DateTime.Now}:Sending template with for card:" + ((card != null) ? card.id.ToString() : "no_card"));
             byte[] buffer = System.Text.Encoding.UTF8.GetBytes(returnFile);
             // Get a response stream and write the response to it.
             response.ContentLength64 = buffer.Length;
@@ -92,6 +93,7 @@ namespace WordBankServer
             returnFile = SetRefresh(false, returnFile);
             returnFile = returnFile.Replace("__TEMPLATE_ITEM_1__", $"<DIV class=\"infotext\">{text}</DIV>");
 
+            Console.WriteLine($"{DateTime.Now}:Sending template with text:{text}");
             byte[] buffer = System.Text.Encoding.UTF8.GetBytes(returnFile);
             // Get a response stream and write the response to it.
             response.ContentLength64 = buffer.Length;
@@ -107,6 +109,7 @@ namespace WordBankServer
             response.AddHeader("Cache-Control", "no-transform, public, max-age=900");
             response.AddHeader("Etag", card.GetHashCode().ToString());
 
+            Console.WriteLine($"{DateTime.Now}:Sending image of card:{card.id}");
             // Pull the image out of the card in memory and send it down.
             response.ContentLength64 = card.CardImage.Length;
             System.IO.Stream output = response.OutputStream;
@@ -120,7 +123,8 @@ namespace WordBankServer
 			// Construct a response.
 			string responseString = "<HTML><BODY>" + outputValue + "</BODY></HTML>";
 			byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
-			// Get a response stream and write the response to it.
+            // Get a response stream and write the response to it.
+            Console.WriteLine($"{DateTime.Now}:Sending text response[{buffer.Length}]:" + responseString);
 			response.ContentLength64 = buffer.Length;
 			System.IO.Stream output = response.OutputStream;
 			output.Write(buffer,0,buffer.Length);

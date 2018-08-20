@@ -38,7 +38,7 @@ namespace WordBankServer
 			List<ConceptCard> results = new List<ConceptCard> ();
 			int cardNum = 0;
 			// read in three words from each difficulty to make a card, until we're < 3 each.
-			while (easyWords.Count > 3 && mediumWords.Count > 3 && hardWords.Count > 3) {
+			while (easyWords.Count >= 3 && mediumWords.Count >= 3 && hardWords.Count >= 3) {
 				List<string> wordsForCard = new List<string> ();
 				for (int i = 0; i < 3; i++) {
 					wordsForCard.Add(RemoveAndRetrieveWord (easyWords, randGen));
