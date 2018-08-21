@@ -96,7 +96,11 @@ namespace WordBankServer
             try
             {
                 NameValueCollection queryParams = ResponseUtils.ParseQueryString(request.Url.Query);
-                // If it doesn't end in a /, it indicates a file.
+                // Suggestion page:  /{deckname}/suggest
+                // OR it could be part of the main template.  Just scroll a bit further down.
+                // Would have to not lose your card though.
+                
+                // If it doesn't end in a /, and doesn't have query arguments, it indicates a file.
                 if (queryParams.Count == 0 && !request.Url.LocalPath.EndsWith("/"))
                 {
                     if (customCardMatch.IsMatch(request.Url.LocalPath))

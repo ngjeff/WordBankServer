@@ -15,6 +15,8 @@ namespace WordBankServer
 
         public byte[] CardImage { get; private set; }
 
+        private readonly TimeSpan leaseLength = TimeSpan.FromMinutes(15);
+
         public ConceptCard (string[] words, int id, Image cardTemplate)
 		{
 			// Contains the words

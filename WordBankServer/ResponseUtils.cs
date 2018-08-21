@@ -11,6 +11,8 @@ namespace WordBankServer
 	{
 		private static string templateFile;
 
+        private static readonly TimeSpan leaseRefreshRate = TimeSpan.FromMinutes(3);
+
 		public static void InitializeTemplate(string templatePath)
 		{
 			templateFile = File.ReadAllText (templatePath);
@@ -73,7 +75,7 @@ namespace WordBankServer
         {
             if (refresh)
             {
-                return returnTemplate.Replace("__TEMPLATE_ITEM_0__", "setInterval(RefreshExpiry, 30000);");
+                return returnTemplate.Replace("__TEMPLATE_ITEM_0__", $"setInterval(RefreshExpiry, {leaseRefreshRate.TotalMilliseconds});");
             }
             else
             {
@@ -127,7 +129,7 @@ namespace WordBankServer
             Console.WriteLine($"{DateTime.Now}:Sending text response[{buffer.Length}]:" + responseString);
 			response.ContentLength64 = buffer.Length;
 			System.IO.Stream output = response.OutputStream;
-			output.Write(buffer,0,buffer.Length);
+			output.Write(buffer,0,buffer.Length);  // SOME BUG HERE, where Bytes exceeds Content-Length for some reason.  Use Chunked so it auto-sets?  Or skip this write altogether?
 			// You must close the output stream.
 			output.Close();
 		}
