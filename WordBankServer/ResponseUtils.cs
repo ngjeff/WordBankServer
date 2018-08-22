@@ -127,7 +127,7 @@ namespace WordBankServer
 			byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
             // Get a response stream and write the response to it.
             Console.WriteLine($"{DateTime.Now}:Sending text response[{buffer.Length}]:" + responseString);
-			response.ContentLength64 = buffer.Length;
+            response.SendChunked = true;
 			System.IO.Stream output = response.OutputStream;
 			output.Write(buffer,0,buffer.Length);  // SOME BUG HERE, where Bytes exceeds Content-Length for some reason.  Use Chunked so it auto-sets?  Or skip this write altogether?
 			// You must close the output stream.
