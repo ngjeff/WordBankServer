@@ -18,6 +18,7 @@ namespace WordBankServer
 
 		private static string xboxWordList = fileDirectory + "wordList_8_17.txt";
         private static string picnicWordList = fileDirectory + "WordBankPicnic.txt";
+		private static string paxWordList = fileDirectory + "WordBankPax.txt";
         private static string templateFile = fileDirectory + "template.html";
 
         // set up some Regexes for later use by all threads
@@ -28,6 +29,7 @@ namespace WordBankServer
         private static Dictionary<string, ConceptDeck> decks = new Dictionary<string, ConceptDeck>();
         private const string XboxDeckName = "xbox";
         private const string PicnicDeckName = "picnic";
+		private const string PaxDeckName = "pax";
 
         public static void Main (string[] args)
 		{
@@ -40,6 +42,7 @@ namespace WordBankServer
 			// read in deck, parse, create cards, save
 			decks[XboxDeckName] = new ConceptDeck(WordParser.ParseWords (randGen, xboxWordList, blankCard), randGen);
             decks[PicnicDeckName] = new ConceptDeck(WordParser.ParseWords(randGen, picnicWordList, blankCard), randGen);
+			decks[PaxDeckName] = new ConceptDeck(WordParser.ParseWords(randGen, paxWordList, blankCard), randGen);
 
             Console.WriteLine(decks[XboxDeckName].ToString ());
 			
