@@ -71,30 +71,29 @@ namespace WordBankServer
             //  / xbox/ [filename]
             //  / xbox/play?action=draw
             //  / xbox/play?action=discard
-              
-            if ((request.Url.Segments.Length < 2) || (request.Url.Segments.Length > 3))
-            {
-                // 404 it.
-                ResponseUtils.SendTextResponse(response, "Invalid URL.");
-                return;
-            }
-
-            // read the deck name segment and trim the forward slash.
-            string deckName = request.Url.Segments[1];
-            deckName = deckName.Substring(0, deckName.Length - 1);
-
-            if (!decks.ContainsKey(deckName))
-            {
-                // 404 it.
-                ResponseUtils.SendTextResponse(response, "Invalid deck name.");
-                return;
-            }
-
-            // ConceptDeck deck = decks[request.Url.Segments[1]];
-            ConceptDeck deck = decks[deckName];
-            string cookieName = $"{deckName}_cardid";
             try
             {
+                if ((request.Url.Segments.Length < 2) || (request.Url.Segments.Length > 3))
+                {
+                    // 404 it.
+                    ResponseUtils.SendTextResponse(response, $"Invalid URL. {request.RemoteEndPoint}");
+                    return;
+                }
+
+                // read the deck name segment and trim the forward slash.
+                string deckName = request.Url.Segments[1];
+                deckName = deckName.Substring(0, deckName.Length - 1);
+
+                if (!decks.ContainsKey(deckName))
+                {
+                    // 404 it.
+                    ResponseUtils.SendTextResponse(response, $"Invalid deck name. {request.RemoteEndPoint}");
+                    return;
+                }
+
+                // ConceptDeck deck = decks[request.Url.Segments[1]];
+                ConceptDeck deck = decks[deckName];
+                string cookieName = $"{deckName}_cardid";
                 NameValueCollection queryParams = ResponseUtils.ParseQueryString(request.Url.Query);
                 // Suggestion page:  /{deckname}/suggest
                 // OR it could be part of the main template.  Just scroll a bit further down.
