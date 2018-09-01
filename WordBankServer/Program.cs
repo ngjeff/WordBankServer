@@ -34,7 +34,7 @@ namespace WordBankServer
         public static void Main (string[] args)
 		{
             //// randGen = new Random (12345); // For now constant seed.
-            randGen = new Random (56987); // For now constant seed.
+            randGen = new Random (12345); // For now constant seed.
 
             // Load up the blank card image.
             Image blankCard = Image.FromFile(fileDirectory + "blankCard.jpg");
